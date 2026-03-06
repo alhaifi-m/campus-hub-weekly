@@ -760,24 +760,7 @@ This is exactly why `STORAGE_KEYS` exists. Constants don't have typos — if you
 
 ## Student Challenge <a name="student-challenge"></a>
 
-### Add a Theme Preference
-
-Add a "Dark Mode" toggle to the Settings screen that persists across app restarts, just like the notifications toggle.
-
-**Requirements:**
-
-1. Add a new toggle below Notifications on the Settings screen, using `AppCard` with a `Switch`, titled "Dark Mode" with subtitle "Use dark theme"
-2. Add a new key to `STORAGE_KEYS` in `lib/storage.ts`: `THEME: "theme"`
-3. Save the toggle value to storage when it changes (same pattern as notifications)
-4. Load the saved value on mount (same `useEffect` pattern)
-5. The toggle should persist — if you toggle it on, close the app, and reopen it, it should still be on
-
-**Hints:**
-1. You already have the pattern — look at how `notifications` + `handleToggle` work. Create `darkMode` + `handleDarkModeToggle` following the same pattern.
-2. You can load both values in the same `useEffect` — just add another `storage.get` call inside `loadNotifications` (and maybe rename it to `loadSettings`).
-3. Don't worry about actually changing the app's colors yet — just make the toggle save and load correctly. We'll connect it to theming in a later week.
-
-**Bonus:** Display a small text indicator below the Dark Mode card that shows the current storage state — something like `"Stored: true"` or `"Stored: false"`. Use another `useEffect` or read it directly from state. This helps you verify that storage is working without having to restart the app.
+See [`docs/labs/LAB9_ASYNCSTORAGE.md`](../labs/LAB9_ASYNCSTORAGE.md)
 
 ---
 
