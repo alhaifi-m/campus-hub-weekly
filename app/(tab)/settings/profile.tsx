@@ -1,5 +1,7 @@
 // Week 9: Local Storage — MODIFIED (persistence + view/edit mode, built on Week 8 React Hook Form + Zod)
+import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react"; // useEffect week 9
+import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator, // week 9
   Pressable,
@@ -10,22 +12,31 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
+import * as storage from "../../../lib/storage"; // week 9
+import { STORAGE_KEYS } from "../../../lib/storage"; // week 9
 import { theme } from "../../../styles/theme";
-import * as storage from "../../../lib/storage";  // week 9
-import { STORAGE_KEYS } from "../../../lib/storage";  // week 9
 
 // Zod schema — unchanged from Week 8
 const profileSchema = z.object({
-  firstName: z.string().trim().min(2, "First name must be at least 2 characters."),
-  lastName:  z.string().trim().min(2, "Last name must be at least 2 characters."),
-  email:     z.string().trim().email("Please enter a valid email address."),
-  studentId: z.string().trim().length(9, "Student ID must be exactly 9 characters."),
-  phone:     z.string().refine(
-    (val) => val.replace(/\D/g, "").length >= 10,
-    "Phone number must have at least 10 digits."
-  ),
+  firstName: z
+    .string()
+    .trim()
+    .min(2, "First name must be at least 2 characters."),
+  lastName: z
+    .string()
+    .trim()
+    .min(2, "Last name must be at least 2 characters."),
+  email: z.string().trim().email("Please enter a valid email address."),
+  studentId: z
+    .string()
+    .trim()
+    .length(9, "Student ID must be exactly 9 characters."),
+  phone: z
+    .string()
+    .refine(
+      val => val.replace(/\D/g, "").length >= 10,
+      "Phone number must have at least 10 digits.",
+    ),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -58,7 +69,7 @@ const Profile = () => {
   // Check if all fields have some value (basic check to prevent saving empty form, since Zod validation only runs on submit)
   // it will produce an array of all field values, check that every value has length > 0 (i.e. is not an empty string)
   // e.g ["Jane", "Smith", "", "A00123456", "(403) 555-0123"] => false because email is empty
-  const isFormFilled = Object.values(watchedValues).every((v) => v.length > 0);
+  const isFormFilled = Object.values(watchedValues).every(v => v.length > 0);
 
   // Load saved profile data on mount
   useEffect(() => {
@@ -106,7 +117,10 @@ const Profile = () => {
   if (!isEditing) {
     const values = watch();
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
         <Text style={styles.h1}>My Profile</Text>
 
         <View style={styles.profileCard}>
@@ -213,9 +227,7 @@ const Profile = () => {
           />
         )}
       />
-      {errors.email && (
-        <Text style={styles.error}>{errors.email.message}</Text>
-      )}
+      {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
 
       {/* Student ID */}
       <Text style={styles.label}>Student ID</Text>
@@ -254,13 +266,26 @@ const Profile = () => {
           />
         )}
       />
-      {errors.phone && (
-        <Text style={styles.error}>{errors.phone.message}</Text>
-      )}
+      {errors.phone && <Text style={styles.error}>{errors.phone.message}</Text>}
 
-      {/* Buttons */} 
+      {/* Buttons */}
       {/* Week 9: if we have saved data, show both Cancel and Save buttons side by side, if we don't have saved data (i.e. first time filling out form), just show the Save button centered */}
-      {hasSavedData ? (
+      <View style={styles.buttonRow}>
+        {hasSavedData && (
+          <Pressable style={styles.cancelButton} onPress={handleCancel}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </Pressable>
+        )}
+        <Pressable
+          style={[styles.saveButton, !isFormFilled && styles.buttonDisabled]}
+          onPress={handleSubmit(onSubmit)}
+          disabled={!isFormFilled}
+        >
+          <Text style={styles.buttonText}>Save Profile</Text>
+        </Pressable>
+      </View>
+
+      {/* {hasSavedData ? (
         <View style={styles.buttonRow}>
           <Pressable style={styles.cancelButton} onPress={handleCancel}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -281,7 +306,7 @@ const Profile = () => {
         >
           <Text style={styles.buttonText}>Save Profile</Text>
         </Pressable>
-      )}
+      )} */}
     </ScrollView>
   );
 };
