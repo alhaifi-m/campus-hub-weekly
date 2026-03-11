@@ -4,11 +4,10 @@
 // Replace with real API (e.g., Supabase) in Week 13.
 // ─────────────────────────────────────────────────────────
 
-// ── Toggle this to force errors (for teaching error states) ──
-const SHOULD_FAIL = false;
+// Week 10: toggle this to true to simulate a network failure and demo the error state
+const SHOULD_FAIL = false; // set to true to demo error state
 
-// ── Types ────────────────────────────────────────────────
-
+// Week 10: TypeScript types for all API responses
 export type Course = {
   id: string;
   code: string;
@@ -32,18 +31,27 @@ export type DashboardData = {
   greeting: string;
 };
 
-// ── Helpers ──────────────────────────────────────────────
-
+// Week 10: helper — simulates network latency so you can see the loading state
+// Returns a Promise that resolves after `ms` milliseconds (default 800ms).
+// new Promise() creates a promise manually; setTimeout fires resolve() after the delay,
+// which causes any "await delay()" call to pause execution for that duration.
 function delay(ms: number = 800): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Week 10: helper — throws when SHOULD_FAIL is true, triggering the error state
+// Throwing inside an async function causes the returned Promise to reject,
+// which means any "await maybeThrow()" call will jump to the nearest catch() block.
+// Flip SHOULD_FAIL to true at the top of this file to demo the error UI in class.
 function maybeThrow(): void {
   if (SHOULD_FAIL) {
     throw new Error("Network request failed. Please check your connection.");
   }
 }
 
+// Returns a time-appropriate greeting string based on the current device clock.
+// new Date().getHours() gives 0–23; we bucket that into morning / afternoon / evening.
+// Called inside getDashboard() so the greeting is always fresh at fetch time.
 function getGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
@@ -51,8 +59,7 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-// ── Mock Data ────────────────────────────────────────────
-
+// Week 10: mock data — replace with real Supabase/REST calls in Week 13
 const COURSES: Course[] = [
   {
     id: "cprg216",
@@ -131,14 +138,21 @@ const DASHBOARD: DashboardData = {
   greeting: "", // filled dynamically
 };
 
-// ── API Functions ────────────────────────────────────────
+// Week 10: exported async API functions — each awaits delay(), then maybeThrow(), then returns data
 
+// Returns the full list of courses after a simulated network delay.
+// The return type Promise<Course[]> means callers must await it to get the array.
+// Pattern: pause → maybe fail → return data. This is identical to how real fetch() calls work.
 export async function getCourses(): Promise<Course[]> {
   await delay();
   maybeThrow();
   return COURSES;
 }
 
+// Looks up a single course by its id string (e.g. "cprg303").
+// COURSE_DETAILS[id] uses the id as a key on a plain object — if it doesn't exist the
+// value is undefined, so we throw a descriptive error instead of returning undefined.
+// This mirrors real APIs that return 404 for unknown resources.
 export async function getCourseById(id: string): Promise<CourseDetail> {
   await delay();
   maybeThrow();
@@ -149,6 +163,10 @@ export async function getCourseById(id: string): Promise<CourseDetail> {
   return course;
 }
 
+// Returns the dashboard summary: next deadline, attendance stats, and a greeting.
+// { ...DASHBOARD, greeting: getGreeting() } uses spread to copy the DASHBOARD object
+// and then overrides the greeting field with a freshly computed value — so the greeting
+// always reflects the time of the actual API call, not when the file loaded.
 export async function getDashboard(): Promise<DashboardData> {
   await delay();
   maybeThrow();

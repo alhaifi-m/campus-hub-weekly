@@ -14,10 +14,12 @@ import * as api from "../../lib/api";
 import type { DashboardData } from "../../lib/api";
 
 export default function Home() {
+  // Week 10: state — data, loading flag, error message
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Week 10: extracted fetch function so it can be called on mount AND on retry
   async function loadDashboard() {
     try {
       setError(null);
@@ -31,11 +33,12 @@ export default function Home() {
     }
   }
 
+  // Week 10: fetch on mount
   useEffect(() => {
     loadDashboard();
   }, []);
 
-  // ── Loading state ──
+  // Week 10: loading state
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -44,7 +47,7 @@ export default function Home() {
     );
   }
 
-  // ── Error state ──
+  // Week 10: error state
   if (error) {
     return (
       <View style={styles.centered}>
@@ -61,7 +64,7 @@ export default function Home() {
     );
   }
 
-  // ── Data state ──
+  // Week 10: data state
   return (
     <View style={styles.container}>
       <Text style={styles.h1}>Campus Hub</Text>
@@ -100,6 +103,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing.screen,
     backgroundColor: theme.colors.bg,
   },
+  // Week 10: centered layout used by loading + error states
   centered: {
     flex: 1,
     justifyContent: "center",
@@ -109,6 +113,7 @@ const styles = StyleSheet.create({
   },
   h1: { fontSize: 28, fontWeight: "800", color: theme.colors.text },
   p: { marginTop: 6, marginBottom: 16, color: theme.colors.muted },
+  // Week 10: error message + retry button styles
   errorText: {
     marginTop: 12,
     fontSize: 16,

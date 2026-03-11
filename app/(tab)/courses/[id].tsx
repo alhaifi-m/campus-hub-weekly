@@ -16,12 +16,15 @@ import * as api from "../../../lib/api";
 import type { CourseDetail } from "../../../lib/api";
 
 export default function CourseDetails() {
+  // Week 10: read the dynamic route param (e.g. "cprg303")
   const { id } = useLocalSearchParams<{ id: string }>();
 
+  // Week 10: state — course detail, loading flag, error message
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Week 10: extracted fetch function — passes id to API, enables retry
   async function loadCourse() {
     try {
       setError(null);
@@ -35,11 +38,12 @@ export default function CourseDetails() {
     }
   }
 
+  // Week 10: fetch on mount
   useEffect(() => {
     loadCourse();
   }, []);
 
-  // ── Loading state ──
+  // Week 10: loading state
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -48,7 +52,7 @@ export default function CourseDetails() {
     );
   }
 
-  // ── Error state ──
+  // Week 10: error state
   if (error) {
     return (
       <View style={styles.centered}>
@@ -65,7 +69,7 @@ export default function CourseDetails() {
     );
   }
 
-  // ── Data state ──
+  // Week 10: data state — course detail with announcements
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header */}
@@ -164,6 +168,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing.screen,
     paddingBottom: 40,
   },
+  // Week 10: centered layout used by loading + error states
   centered: {
     flex: 1,
     justifyContent: "center",
@@ -196,6 +201,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 10,
   },
+  // Week 10: error message + retry button styles
   errorText: {
     marginTop: 12,
     fontSize: 16,

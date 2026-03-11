@@ -16,11 +16,13 @@ import * as api from "../../../lib/api";
 import type { Course } from "../../../lib/api";
 
 export default function CoursesList() {
+  // Week 10: state — courses list, loading flag, refresh flag, error message
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Week 10: extracted fetch function — used on mount and on retry
   async function loadCourses() {
     try {
       setError(null);
@@ -34,6 +36,7 @@ export default function CoursesList() {
     }
   }
 
+  // Week 10: pull-to-refresh handler — separate refreshing flag keeps spinner visible
   async function handleRefresh() {
     try {
       setRefreshing(true);
@@ -47,11 +50,12 @@ export default function CoursesList() {
     }
   }
 
+  // Week 10: fetch on mount
   useEffect(() => {
     loadCourses();
   }, []);
 
-  // ── Loading state (first load only) ──
+  // Week 10: loading state (first load only)
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -60,7 +64,7 @@ export default function CoursesList() {
     );
   }
 
-  // ── Error state ──
+  // Week 10: error state
   if (error) {
     return (
       <View style={styles.centered}>
@@ -77,7 +81,7 @@ export default function CoursesList() {
     );
   }
 
-  // ── Data state ──
+  // Week 10: data state — FlatList with pull-to-refresh + empty component
   return (
     <View style={styles.container}>
       <Text style={styles.h1}>Your Courses</Text>
@@ -116,6 +120,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing.screen,
     backgroundColor: theme.colors.bg,
   },
+  // Week 10: centered layout used by loading + error states
   centered: {
     flex: 1,
     justifyContent: "center",
@@ -129,6 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: theme.colors.text,
   },
+  // Week 10: error message + retry button styles
   errorText: {
     marginTop: 12,
     fontSize: 16,
@@ -147,6 +153,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
+  // Week 10: empty list style — shown via ListEmptyComponent
   emptyText: {
     textAlign: "center",
     color: theme.colors.muted,
