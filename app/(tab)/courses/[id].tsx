@@ -84,7 +84,11 @@ export default function CourseDetails() {
         title="Instructor"
         subtitle={course?.instructor}
         right={
-          <Ionicons name="person-outline" size={20} color={theme.colors.muted} />
+          <Ionicons
+            name="person-outline"
+            size={20}
+            color={theme.colors.muted}
+          />
         }
       />
       <AppCard
