@@ -1,34 +1,49 @@
-// Week 9: Local Storage — MODIFIED (added persistence for notifications toggle)
+// Week 12: Supabase Auth — MODIFIED (added Sign Out card)
+// Week 9: Local Storage — original persistence for notifications toggle
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AppCard from "../../../components/AppCard";
 import { theme } from "../../../styles/theme";
 import * as storage from "../../../lib/storage";
 import { STORAGE_KEYS } from "../../../lib/storage";
+import { useAuth } from "../../../context/AuthContext"; // Week 12
 
-export default function Settings() {
+const Settings = () => {
   const [notifications, setNotifications] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const { signOut } = useAuth(); // Week 12
 
   // Load saved notification preference on mount
   useEffect(() => {
-    async function loadNotifications() {
+    const loadNotifications = async () => {
       const saved = await storage.get<boolean>(STORAGE_KEYS.NOTIFICATIONS);
       if (saved !== null) {
         setNotifications(saved);
       }
       setIsLoading(false);
-    }
+    };
     loadNotifications();
   }, []);
 
   // Save notification preference when toggled
-  async function handleToggle(value: boolean) {
+  const handleToggle = async (value: boolean) => {
     setNotifications(value);
     await storage.set(STORAGE_KEYS.NOTIFICATIONS, value);
-  }
+  };
+
+  // Week 12: Sign out — AuthGuard in _layout.tsx will redirect to /login
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   if (isLoading) {
     return (
@@ -63,9 +78,28 @@ export default function Settings() {
           }
         />
       </Pressable>
+
+      {/* Week 12 — Sign out. Calling signOut() triggers onAuthStateChange in
+          AuthContext, which sets session to null, which triggers AuthGuard to
+          redirect to /login. No explicit navigation needed here. */}
+      <Pressable onPress={handleSignOut}>
+        <AppCard
+          title="Sign Out"
+          subtitle="Sign out of your account"
+          right={
+            <Ionicons
+              name="log-out-outline"
+              size={20}
+              color={theme.colors.error}
+            />
+          }
+        />
+      </Pressable>
     </View>
   );
-}
+};
+
+export default Settings;
 
 const styles = StyleSheet.create({
   container: {

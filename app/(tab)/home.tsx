@@ -1,4 +1,5 @@
-// Week 10: API Calls + Loading States — MODIFIED (fetch dashboard data from API)
+// Week 12: Supabase Auth — MODIFIED (show signed-in user email)
+// Week 10: API Calls + Loading States — original dashboard fetch
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,11 +13,13 @@ import AppCard from "../../components/AppCard";
 import { theme } from "../../styles/theme";
 import * as api from "../../lib/api";
 import type { DashboardData } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext"; // Week 12
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth(); // Week 12 — the signed-in user from Supabase
 
   async function loadDashboard() {
     try {
@@ -65,6 +68,12 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <Text style={styles.h1}>Campus Hub</Text>
+
+      {/* Week 12 — show which account is signed in */}
+      {user?.email && (
+        <Text style={styles.userEmail}>{user.email}</Text>
+      )}
+
       <Text style={styles.p}>{data?.greeting} — here's your overview</Text>
 
       <AppCard
@@ -108,6 +117,12 @@ const styles = StyleSheet.create({
     padding: theme.spacing.screen,
   },
   h1: { fontSize: 28, fontWeight: "800", color: theme.colors.text },
+  userEmail: {
+    marginTop: 4,
+    fontSize: 13,
+    color: theme.colors.primary,
+    fontWeight: "500",
+  },
   p: { marginTop: 6, marginBottom: 16, color: theme.colors.muted },
   errorText: {
     marginTop: 12,
