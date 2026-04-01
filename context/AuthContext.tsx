@@ -35,9 +35,11 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // ── Provider ──────────────────────────────────────────────────────────────────
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  // Week 12 - Class Code
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true); // true until we know if a session exists
 
+  // Week 12 - Class Code
   useEffect(() => {
     // 1. Load any existing session from AsyncStorage (set by a previous sign-in)
     //    This is how "stay logged in" works — we check storage before showing any screen.
@@ -68,12 +70,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── Auth functions ──────────────────────────────────────────────────────────
 
+  // Week 12 - Class Code
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     // On success: onAuthStateChange fires → session state updates → AuthGuard redirects
   };
 
+  // Week 12 - Class Code
   const signUp = async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
@@ -82,6 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // If disabled (for development) → session is set immediately on sign-up.
   };
 
+  // Week 12 - Class Code
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;

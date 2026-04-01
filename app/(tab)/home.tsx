@@ -13,13 +13,13 @@ import AppCard from "../../components/AppCard";
 import { theme } from "../../styles/theme";
 import * as api from "../../lib/api";
 import type { DashboardData } from "../../lib/api";
-import { useAuth } from "../../context/AuthContext"; // Week 12
+import { useAuth } from "../../context/AuthContext"; // Week 12 - Class Code
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth(); // Week 12 — the signed-in user from Supabase
+  const { user } = useAuth(); // Week 12 - Class Code
 
   async function loadDashboard() {
     try {
@@ -69,6 +69,7 @@ export default function Home() {
     <View style={styles.container}>
       <Text style={styles.h1}>Campus Hub</Text>
 
+      {/* Week 12 - Class Code */}
       {/* Week 12 — show which account is signed in */}
       {user?.email && (
         <Text style={styles.userEmail}>{user.email}</Text>

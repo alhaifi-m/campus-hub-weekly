@@ -19,7 +19,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext"; // Week 12 - Class Code
 import { theme } from "../styles/theme";
 
 // ── Validation schema ─────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const Login = () => {
-  const { signIn } = useAuth();
+  const { signIn } = useAuth(); // Week 12 - Class Code
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -52,7 +52,7 @@ const Login = () => {
     try {
       setAuthError(null);
       setIsSubmitting(true);
-      await signIn(data.email, data.password);
+      await signIn(data.email, data.password); // Week 12 - Class Code
       // No manual navigation needed — AuthGuard in _layout.tsx watches the session
       // and redirects to /(tab)/home once session becomes non-null.
     } catch (e) {

@@ -15,12 +15,12 @@ import AppCard from "../../../components/AppCard";
 import { theme } from "../../../styles/theme";
 import * as storage from "../../../lib/storage";
 import { STORAGE_KEYS } from "../../../lib/storage";
-import { useAuth } from "../../../context/AuthContext"; // Week 12
+import { useAuth } from "../../../context/AuthContext"; // Week 12 - Class Code
 
 const Settings = () => {
   const [notifications, setNotifications] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { signOut } = useAuth(); // Week 12
+  const { signOut } = useAuth(); // Week 12 - Class Code
 
   // Load saved notification preference on mount
   useEffect(() => {
@@ -40,6 +40,7 @@ const Settings = () => {
     await storage.set(STORAGE_KEYS.NOTIFICATIONS, value);
   };
 
+  // Week 12 - Class Code
   // Week 12: Sign out — AuthGuard in _layout.tsx will redirect to /login
   const handleSignOut = async () => {
     await signOut();
@@ -79,6 +80,7 @@ const Settings = () => {
         />
       </Pressable>
 
+      {/* Week 12 - Class Code */}
       {/* Week 12 — Sign out. Calling signOut() triggers onAuthStateChange in
           AuthContext, which sets session to null, which triggers AuthGuard to
           redirect to /login. No explicit navigation needed here. */}

@@ -9,8 +9,9 @@
 //   checks needed in each tab screen.
 import { useEffect } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { AuthProvider, useAuth } from "../context/AuthContext"; // Week 12 - Class Code
 
+// Week 12 - Class Code
 // ── AuthGuard ─────────────────────────────────────────────────────────────────
 // Inner component — reads auth state and enforces route protection.
 // Rendered inside AuthProvider so it can call useAuth().
@@ -48,6 +49,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
 const RootLayout = () => {
   return (
+    // Week 12 - Class Code: wrap with AuthProvider + AuthGuard
     <AuthProvider>
       <AuthGuard>
         <Stack screenOptions={{ headerShown: false }}>
