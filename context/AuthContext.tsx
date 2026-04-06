@@ -59,8 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     //    This is the single place that updates session state — no manual state
     //    management needed after signIn() or signOut() calls.
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+      data: { subscription },} = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 

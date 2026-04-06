@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(npx tsc:*)",
+      "Bash(cmd /c \"winget list --id GitHub.cli\" 2>&1)",
+      "Bash(cd:*)"
     ]
   }
 }
