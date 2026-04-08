@@ -1,5 +1,6 @@
+// Week 13: Supabase DB + Sync — MODIFIED (live dashboard data from Supabase)
 // Week 12: Supabase Auth — MODIFIED (show signed-in user email)
-// Week 10: API Calls + Loading States — original dashboard fetch
+// Week 10: API Calls + Loading States — original fetch pattern kept, source replaced
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,28 +12,29 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AppCard from "../../components/AppCard";
 import { theme } from "../../styles/theme";
-import * as api from "../../lib/api";
-import type { DashboardData } from "../../lib/api";
-import { useAuth } from "../../context/AuthContext"; // Week 12 - Class Code
+import { useAuth } from "../../context/AuthContext";
+import * as db from "../../lib/db"; // week13 — new database layer, replaces api.ts
+import type { DashboardData } from "../../lib/db"; // week13 — type for greeting + nextDeadline + attendance from Supabase
 
-export default function Home() {
+const Home = () => {
+  const { user } = useAuth();
+
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth(); // Week 12 - Class Code
 
-  async function loadDashboard() {
+  const loadDashboard = async () => {
     try {
       setError(null);
       setIsLoading(true);
-      const result = await api.getDashboard();
+      const result = await db.getDashboardData(user!.id); // week13 — replaced api.getDashboard() with real Supabase query (attendance summed across all enrollments, next deadline from DB)
       setData(result);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     loadDashboard();
@@ -69,29 +71,47 @@ export default function Home() {
     <View style={styles.container}>
       <Text style={styles.h1}>Campus Hub</Text>
 
-      {/* Week 12 - Class Code */}
-      {/* Week 12 — show which account is signed in */}
+      {/* Week 12: signed-in user email */}
       {user?.email && (
         <Text style={styles.userEmail}>{user.email}</Text>
       )}
 
       <Text style={styles.p}>{data?.greeting} — here's your overview</Text>
 
-      <AppCard
-        title="Upcoming Deadline"
-        subtitle={`${data?.nextDeadline.course} ${data?.nextDeadline.title} — due ${data?.nextDeadline.dueDate}`}
-        right={
-          <Ionicons
-            name="alert-circle-outline"
-            size={22}
-            color={theme.colors.primary}
-          />
-        }
-      />
+      {/* week13 — nextDeadline is now nullable; real DB may have no upcoming deadlines (mock always had one hardcoded) */}
+      {data?.nextDeadline ? (
+        <AppCard
+          title="Upcoming Deadline"
+          subtitle={`${data.nextDeadline.course} ${data.nextDeadline.title} — due ${data.nextDeadline.dueDate}`} // week13 — real course code + deadline title + due date from the deadlines table
+          right={
+            <Ionicons
+              name="alert-circle-outline"
+              size={22}
+              color={theme.colors.primary}
+            />
+          }
+        />
+      ) : (
+        <AppCard // week13 — empty state; shown when no deadlines with due_date >= today exist in the DB
+          title="Upcoming Deadline"
+          subtitle="No upcoming deadlines"
+          right={
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={22}
+              color={theme.colors.primary}
+            />
+          }
+        />
+      )}
 
       <AppCard
         title="Attendance"
-        subtitle={`${data?.attendance.attended}/${data?.attendance.total} classes — ${data?.attendance.percentage}%`}
+        subtitle={
+          data
+            ? `${data.attendance.attended}/${data.attendance.total} classes — ${data.attendance.percentage}%` // week13 — real numbers summed across all enrollments; was a hardcoded "36/42" string
+            : "No data yet"
+        }
         right={
           <Ionicons
             name="checkmark-circle-outline"
@@ -102,7 +122,9 @@ export default function Home() {
       />
     </View>
   );
-}
+};
+
+export default Home;
 
 const styles = StyleSheet.create({
   container: {

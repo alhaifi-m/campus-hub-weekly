@@ -1,4 +1,5 @@
-// Week 10: API Calls + Loading States — MODIFIED (full detail page with API fetch)
+// Week 13: Supabase DB + Sync — MODIFIED (real course data from Supabase)
+// Week 10: API Calls + Loading States — original fetch pattern kept, source replaced
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,28 +13,30 @@ import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AppCard from "../../../components/AppCard";
 import { theme } from "../../../styles/theme";
-import * as api from "../../../lib/api";
-import type { CourseDetail } from "../../../lib/api";
+import { useAuth } from "../../../context/AuthContext"; // week13 — need user.id to scope the query to this student
+import * as db from "../../../lib/db"; // week13 — new database layer, replaces api.ts
+import type { CourseDetail } from "../../../lib/db"; // week13 — type for the course + grade + deadlines + announcements shape
 
-export default function CourseDetails() {
+const CourseDetails = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth(); // week13 — user.id is required by getCourseDetail to enforce ownership
 
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadCourse() {
+  const loadCourse = async () => {
     try {
       setError(null);
       setIsLoading(true);
-      const result = await api.getCourseById(id!);
+      const result = await db.getCourseDetail(id!, user!.id); // week13 — replaced api.getCourseById(id) with real Supabase query (3 queries: enrollment + announcements + deadlines)
       setCourse(result);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     loadCourse();
@@ -66,6 +69,12 @@ export default function CourseDetails() {
   }
 
   // ── Data state ──
+  // week13 — attendance is now two real numbers from the DB; calculate % here, guard against zero total
+  const attendancePct =
+    course!.attendanceTotal > 0
+      ? Math.round((course!.attendanceAttended / course!.attendanceTotal) * 100)
+      : 0;
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header */}
@@ -73,7 +82,7 @@ export default function CourseDetails() {
       <Text style={styles.h1}>{course?.title}</Text>
       <Text style={styles.description}>{course?.description}</Text>
 
-      {/* Info Cards */}
+      {/* Course Info */}
       <Text style={styles.sectionTitle}>Course Info</Text>
 
       <AppCard
@@ -101,6 +110,10 @@ export default function CourseDetails() {
           />
         }
       />
+
+      {/* Academic Progress */}
+      <Text style={styles.sectionTitle}>Your Progress</Text>
+
       <AppCard
         title="Grade"
         subtitle={course?.grade}
@@ -113,19 +126,8 @@ export default function CourseDetails() {
         }
       />
       <AppCard
-        title="Next Deadline"
-        subtitle={course?.nextDeadline}
-        right={
-          <Ionicons
-            name="alert-circle-outline"
-            size={20}
-            color={theme.colors.primary}
-          />
-        }
-      />
-      <AppCard
         title="Attendance"
-        subtitle={course?.attendance}
+        subtitle={`${course?.attendanceAttended}/${course?.attendanceTotal} classes — ${attendancePct}%`} // week13 — real numbers from enrollments.attendance_attended / attendance_total
         right={
           <Ionicons
             name="checkmark-circle-outline"
@@ -135,25 +137,55 @@ export default function CourseDetails() {
         }
       />
 
+      {/* Upcoming Deadlines */}
+      <Text style={styles.sectionTitle}>Deadlines</Text>
+
+      {/* week13 — deadlines is now a real array from the DB; was a single hardcoded string */}
+      {course!.deadlines.length === 0 ? (
+        <Text style={styles.emptySection}>No upcoming deadlines.</Text> // week13 — empty state for when no deadlines exist in the DB
+      ) : (
+        course!.deadlines.map((deadline) => ( // week13 — map over all deadlines sorted by due_date ASC
+          <AppCard
+            key={deadline.id}
+            title={deadline.title}
+            subtitle={`Due: ${deadline.dueDate}`}
+            right={
+              <Ionicons
+                name="alert-circle-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            }
+          />
+        ))
+      )}
+
       {/* Announcements */}
       <Text style={styles.sectionTitle}>Announcements</Text>
 
-      {course?.announcements.map((text, index) => (
-        <AppCard
-          key={index}
-          title={text}
-          right={
-            <Ionicons
-              name="megaphone-outline"
-              size={18}
-              color={theme.colors.muted}
-            />
-          }
-        />
-      ))}
+      {/* week13 — announcements is now an array of objects from the DB; was an array of plain strings */}
+      {course!.announcements.length === 0 ? (
+        <Text style={styles.emptySection}>No announcements yet.</Text> // week13 — empty state for when no announcements exist in the DB
+      ) : (
+        course!.announcements.map((announcement) => ( // week13 — map over announcement objects, newest first (ordered by created_at DESC)
+          <AppCard
+            key={announcement.id}
+            title={announcement.body} // week13 — announcement is now an object with .id, .body, .createdAt; was a plain string
+            right={
+              <Ionicons
+                name="megaphone-outline"
+                size={18}
+                color={theme.colors.muted}
+              />
+            }
+          />
+        ))
+      )}
     </ScrollView>
   );
-}
+};
+
+export default CourseDetails;
 
 const styles = StyleSheet.create({
   container: {
@@ -195,6 +227,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     marginTop: 8,
     marginBottom: 10,
+  },
+  emptySection: {
+    fontSize: 14,
+    color: theme.colors.muted,
+    marginBottom: 8,
   },
   errorText: {
     marginTop: 12,
