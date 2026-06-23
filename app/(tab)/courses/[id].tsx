@@ -111,7 +111,7 @@ const CourseDetails = () => {
         }
       />
 
-      {/* Academic Progress */}
+      {/* Week 13 Academic Progress */}  
       <Text style={styles.sectionTitle}>Your Progress</Text>
 
       <AppCard

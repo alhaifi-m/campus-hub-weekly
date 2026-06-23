@@ -57,18 +57,19 @@ insert into deadlines (course_id, title, due_date) values
   (
     'aaaaaaaa-0000-0000-0000-000000000001',
     'Assignment 3',
-    (current_date + interval '7 days')::date
+    '2026-04-20'
   ),
   (
     'aaaaaaaa-0000-0000-0000-000000000002',
     'Lab 13 — Supabase Integration',
-    (current_date + interval '10 days')::date
+    '2026-04-24'
   ),
   (
     'aaaaaaaa-0000-0000-0000-000000000003',
     'Project Milestone 2',
-    (current_date + interval '14 days')::date
-  );
+    '2026-04-30'
+  )
+on conflict do nothing;
 
 
 -- ── Announcements ─────────────────────────────────────────────────────────────
